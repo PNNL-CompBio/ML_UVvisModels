@@ -1,0 +1,20 @@
+{
+    "depth": 6,
+    "dropout": 0.10,
+    "ffn_hidden_size": 2100,
+    "ffn_num_layers": 3,
+    "hidden_size": 1100,
+    "ensemble_size": 10,
+    "epochs": 250,
+    "dataset_type": "spectra",
+    "normalization_start":180 ,
+    "normalization_end":180,
+    "no_features_scaling": true,
+    "max_lr": 7e-5,
+    "final_lr": 7e-5,
+    "metric": "srmse",
+    "output_activation": "exp",
+    "split_type": "random_with_repeated_smiles",
+    "save_smiles_splits": true,
+    "gpu": 0
+}
