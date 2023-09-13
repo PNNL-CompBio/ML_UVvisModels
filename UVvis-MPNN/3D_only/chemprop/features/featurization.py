@@ -14,6 +14,7 @@ import itertools
 import rdkit
 
 import csv
+import os
 
 # Atom feature sizes
 MAX_ATOMIC_NUM = 100
@@ -223,9 +224,9 @@ class MolGraph:
         self.b2a = []  # mapping from bond index to the index of the atom the bond is coming from
         self.b2revb = []  # mapping from bond index to the index of the reverse bond
         
-        if args.structures_path is True:
+        if os.path.exists('./structures') is True:
             # Convert smiles to molecule
-            reader = csv.DictReader(open(args.structures_path+'/smiles_to_xyz.csv'))
+            reader = csv.DictReader(open('./structures/smiles_to_xyz.csv'))
             xyz_map = next(reader) 
             xyz_file = xyz_map.get(smiles)
             print('xyz_file: ',xyz_file)
