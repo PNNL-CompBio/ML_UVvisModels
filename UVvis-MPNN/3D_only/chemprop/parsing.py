@@ -39,6 +39,8 @@ def add_predict_args(parser: ArgumentParser):
                         help='Method of generating additional features')
     parser.add_argument('--features_path', type=str, nargs='*',
                         help='Path to features to use in FNN (instead of features_generator)')
+    parser.add_argument('--structures_path', type=str, nargs='*',
+                        help='Path to QM optimized structures to use in encoder')
     parser.add_argument('--max_data_size', type=int,
                         help='Maximum number of data points to load')
     parser.add_argument('--ensemble_variance', action='store_true', default=False,
@@ -74,6 +76,8 @@ def add_train_args(parser: ArgumentParser):
                         help='Method of generating additional features')
     parser.add_argument('--features_path', type=str, nargs='*',
                         help='Path to features to use in FNN (instead of features_generator)')
+    parser.add_argument('--structures_path', type=str, nargs='*',
+                        help='Path to QM optimized structures to use in encoder')
     parser.add_argument('--save_dir', type=str, default=None,
                         help='Directory where model checkpoints will be saved')
     parser.add_argument('--save_smiles_splits', action='store_true', default=False,

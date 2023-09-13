@@ -13,7 +13,7 @@ import numpy as np
 import itertools
 import rdkit
 
-import csv #mcna892 add 
+import csv
 
 # Atom feature sizes
 MAX_ATOMIC_NUM = 100
@@ -223,67 +223,66 @@ class MolGraph:
         self.b2a = []  # mapping from bond index to the index of the atom the bond is coming from
         self.b2revb = []  # mapping from bond index to the index of the reverse bond
         
+        if args.structures_path is True:
+            # Convert smiles to molecule
+            reader = csv.DictReader(open(args.structures_path+'/smiles_to_xyz.csv'))
+            xyz_map = next(reader) 
+            xyz_file = xyz_map.get(smiles)
+            print('xyz_file: ',xyz_file)
+            xyz_path = args.structures_path+'/{0}'.format(xyz_file)
         
-        # Convert smiles to molecule
-        reader = csv.DictReader(open('/qfs/projects/MulCME/Rajendra/darpa/MMPI_set3/TRAIN_TEST_VALIDATION/FULL_DATA/FULL_FULL/smiles_to_xyz.csv')) #mcna892 edit begin
-        xyz_map = next(reader) 
-#        print('pdb_dict: ',pdb_map)
-        xyz_file = xyz_map.get(smiles)
-        print('xyz_file: ',xyz_file)
-        xyz_path = '/qfs/projects/MulCME/Rajendra/darpa/MMPI_set3/TRAIN_TE\
-ST_VALIDATION/FULL_DATA/FULL_FULL/{0}'.format(xyz_file)
+            with open(xyz_path,'r') as f:
+                lines = f.read()
+
+            mol = Chem.MolFromPDBBlock(xyz_to_pdb_block(lines), removeHs=False)
+
+            print('Loaded xyz File') # end mcna892 edit
+            print(mol)
+
+            order_by_atomic_num = tuple(zip(*sorted(
+                [(a.GetIdx() if a.GetAtomicNum() > 1 else a.GetIdx() + mol.GetNumAtoms(), i
+              ) for i, a in enumerate(mol.GetAtoms())])))[1]
+
+            mol = AllChem.RenumberAtoms(mol, order_by_atomic_num)
         
-        with open(xyz_path,'r') as f:
-            lines = f.read()
-
-        mol = Chem.MolFromPDBBlock(xyz_to_pdb_block(lines), removeHs=False)
-
-        print('Loaded xyz File') # end mcna892 edit
-        print(mol)
-        #mol = Chem.AddHs(mol) # MF 020620
-#        AllChem.EmbedMolecule(test_mol) # mcna892 removed in case this is recalculating coords
-# RJ
-### BEGIN MCNA892 EDIT
-        order_by_atomic_num = tuple(zip(*sorted(
-            [(a.GetIdx() if a.GetAtomicNum() > 1 else a.GetIdx() + mol.GetNumAtoms(), i
-          ) for i, a in enumerate(mol.GetAtoms())])))[1]
-
-        mol = AllChem.RenumberAtoms(mol, order_by_atomic_num)
-        
-        smiles_mol = Chem.MolFromSmiles(smiles)
-
-        xyz_mol_no_h = AllChem.AssignBondOrdersFromTemplate(smiles_mol, Chem.RemoveHs(mol))
-
-        xyz_mol_bo = Chem.RWMol(xyz_mol_no_h)
-
-        for a in mol.GetAtoms():
-            if (a.GetAtomicNum() == 1):
-                xyz_mol_bo.AddAtom(a)
-
-        mol_conf = mol.GetConformer()
-        mol_bo_conf = xyz_mol_bo.GetConformer()
-        
-        for b in mol.GetBonds():
-            if (b.GetBeginAtom().GetAtomicNum() == 1):
-                hydro = b.GetBeginAtom()
-            elif (b.GetEndAtom().GetAtomicNum() == 1):
-                hydro = b.GetEndAtom()
-            else:
-                continue
-            heavy_idx = b.GetOtherAtom(hydro).GetIdx()
-            hydro_idx = hydro.GetIdx()
-            heavy = xyz_mol_bo.GetAtomWithIdx(heavy_idx)
-            heavy.SetNoImplicit(True)
-            heavy.SetNumExplicitHs(0)
-            xyz_mol_bo.AddBond(heavy_idx, hydro_idx, Chem.BondType.SINGLE)
-            mol_bo_conf.SetAtomPosition(hydro_idx, mol_conf.GetAtomPosition(hydro_idx))
+            smiles_mol = Chem.MolFromSmiles(smiles)
             
-        mol = xyz_mol_bo
-### END MCNA892 EDIT        
+            xyz_mol_no_h = AllChem.AssignBondOrdersFromTemplate(smiles_mol, Chem.RemoveHs(mol))
+            
+            xyz_mol_bo = Chem.RWMol(xyz_mol_no_h)
+
+            for a in mol.GetAtoms():
+                if (a.GetAtomicNum() == 1):
+                    xyz_mol_bo.AddAtom(a)
+
+            mol_conf = mol.GetConformer()
+            mol_bo_conf = xyz_mol_bo.GetConformer()
+        
+            for b in mol.GetBonds():
+                if (b.GetBeginAtom().GetAtomicNum() == 1):
+                    hydro = b.GetBeginAtom()
+                elif (b.GetEndAtom().GetAtomicNum() == 1):
+                    hydro = b.GetEndAtom()
+                else:
+                    continue
+                heavy_idx = b.GetOtherAtom(hydro).GetIdx()
+                hydro_idx = hydro.GetIdx()
+                heavy = xyz_mol_bo.GetAtomWithIdx(heavy_idx)
+                heavy.SetNoImplicit(True)
+                heavy.SetNumExplicitHs(0)
+                xyz_mol_bo.AddBond(heavy_idx, hydro_idx, Chem.BondType.SINGLE)
+                mol_bo_conf.SetAtomPosition(hydro_idx, mol_conf.GetAtomPosition(hydro_idx))
+            
+            mol = xyz_mol_bo
+        else:
+            mol_no_h = Chem.MolFromSmiles(smiles)
+            mol = Chem.AddHs(mol_no_h)
+            AllChem.EmbedMolecule(mol)
+
         conf = mol.GetConformer()
 
         gaus_dist = np.linspace(0, 4, 10)
-#
+
         # fake the number of "atoms" if we are collapsing substructures
         self.n_atoms = mol.GetNumAtoms()
         
