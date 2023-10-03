@@ -38,7 +38,6 @@ Solubility Prediction. Journal of Chemical Information and Modeling 2021, 61, 25
 @article{McNaughton2023,
 author = {McNaughton, Andrew D. and Joshi, Rajendra P. and Knutson, Carter R. and Fnu, Anubhav and Luebke, Kevin J. and Malerich, Jeremiah P. and Madrid, Peter B. and Kumar, Neeraj},
 doi = {10.1021/acs.jcim.2c01662},
-file = {:Users/mcna892/Library/Application Support/Mendeley Desktop/Downloaded/McNaughton et al. - 2023 - Machine Learning Models for Predicting Molecular UV–Vis Spectra with Quantum Mechanical Properties.pdf:pdf},
 issn = {1549-9596},
 journal = {Journal of Chemical Information and Modeling},
 month = {mar},
